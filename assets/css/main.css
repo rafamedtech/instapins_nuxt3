@@ -1,0 +1,88 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@100;400;500;700&display=swap');
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  * {
+    -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+  }
+  body {
+    /* font-family: 'Poppins', sans-serif; */
+    overflow-x: hidden;
+    -ms-overflow-style: none; /* IE and Edge */
+    scrollbar-width: none; /* Firefox */
+  }
+
+  body::-webkit-scrollbar {
+    display: none;
+  }
+
+  input::-webkit-file-upload-button {
+    display: none;
+  }
+  input[type='file'] {
+    -webkit-appearance: none;
+  }
+}
+
+@layer components {
+  .chat-btn {
+    @apply ml-2 max-w-xs rounded-2xl bg-gray-500 p-4 text-white md:ml-4;
+  }
+
+  .chat-btn-other {
+    @apply ml-auto mr-2 max-w-xs rounded-2xl bg-primary p-4 text-white md:mr-4;
+  }
+}
+
+@layer utilities {
+  .active-dropzone {
+    background-color: #2f80ed;
+    border-color: #fff;
+    transition: all 0.3s ease;
+  }
+
+  .loading-animation::after {
+    animation: loading-animation 1.5s linear infinite;
+  }
+  @keyframes loading-animation {
+    0% {
+      transform: translateX(-250px);
+    }
+    100% {
+      transform: translateX(400px);
+    }
+  }
+}
+
+/* Transitions */
+.slide-fade-enter {
+  transform: translateY(30px);
+  /* opacity: 0; */
+}
+
+.slide-fade-enter-active,
+.slide-fade-leave-active {
+  transition: all 0.25s ease-out;
+}
+
+.slide-fade-leave-to {
+  transform: translateY(-30px);
+  /* opacity: 0; */
+}
+
+.fade-enter {
+  transform: scale(0.9);
+  /* opacity: 0; */
+}
+
+.fade-enter-active,
+.fade-leave-active {
+  transition: all 0.5s ease;
+}
+
+.fade-leave-to {
+  transform: scale(0.9);
+  /* opacity: 0; */
+}
