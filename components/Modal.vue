@@ -9,13 +9,6 @@ defineProps({
     default: false,
   },
 });
-
-const closeModal = () => {
-  this.$emit('closeModal');
-};
-const onAction = () => {
-  this.$emit('onAction');
-};
 </script>
 
 <template>
@@ -29,8 +22,8 @@ const onAction = () => {
         class="cursor-pointer rounded-lg bg-primary px-3 py-3 text-white shadow-md hover:bg-primary/75"
         @click="
           () => {
-            onAction();
-            closeModal();
+            $emit('onAction');
+            $emit('closeModal');
           }
         "
       >

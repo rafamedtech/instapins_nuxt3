@@ -3,20 +3,19 @@ import HeartOutline from 'icons/HeartOutline.vue';
 import DeleteEmpty from 'icons/DeleteEmpty.vue';
 import LeadPencil from 'icons/LeadPencil.vue';
 
-defineProps({
+const props = defineProps({
   pin: {
     type: Object,
-    required: true,
   },
 });
 
 // Local state
-const liked = useState(false);
+const liked = ref(false);
 const user = useSupabaseUser();
 
 onMounted(() => {
   if (user) {
-    if (pin.likes.length) {
+    if (props.pin.likes) {
       if (
         pin.likes.find((like) => {
           return like.username === user.username;
@@ -67,7 +66,7 @@ const deletePin = () => {
   <div
     class="group relative block max-w-sm cursor-zoom-in break-inside-avoid overflow-hidden rounded-2xl shadow-xl"
   >
-    <nuxt-link :to="`/${pin.id}`" class="cursor-zoom-in">
+    <nuxt-link :to="`/${props.pin.id}`" class="cursor-zoom-in">
       <img
         class="w-full transition-all duration-300 group-hover:scale-110 group-hover:brightness-50"
         :src="pin.url"
@@ -75,12 +74,12 @@ const deletePin = () => {
     </nuxt-link>
 
     <p class="absolute bottom-2 left-2 hidden self-end text-white group-hover:block">
-      {{ pin.title }}
+      {{ props.pin.title }}
     </p>
 
-    <div v-if="$auth.loggedIn" class="absolute top-2 right-2 hidden self-start group-hover:block">
+    <div v-if="user" class="absolute top-2 right-2 hidden self-start group-hover:block">
       <button
-        v-if="$auth.user.username === pin.owner && $route.path === '/profile'"
+        v-if="user.username === props.pin.owner && $route.path === '/profile'"
         class="rounded-lg p-1 text-white transition-all duration-300 hover:bg-primary"
       >
         <nuxt-link :to="`/${pin.id}/edit/`">
@@ -88,7 +87,7 @@ const deletePin = () => {
         </nuxt-link>
       </button>
       <button
-        v-if="$auth.user.username === pin.owner && $route.path === '/profile'"
+        v-if="user.username === props.pin.owner && $route.path === '/profile'"
         class="rounded-lg p-1 text-white transition-all duration-300 hover:bg-red-500"
       >
         <DeleteEmpty :size="32" @click="deletePin" />
@@ -103,9 +102,9 @@ const deletePin = () => {
         :size="48"
         :fill-color="liked ? 'red' : 'gray'"
         class="text-white"
-        :class="$auth.loggedIn ? 'cursor-pointer' : 'cursor-not-allowed'"
-        :title="$auth.loggedIn ? 'Like' : 'You must be logged in to like pins'"
-        @click="$auth.loggedIn ? like() : null"
+        :class="user ? 'cursor-pointer' : 'cursor-not-allowed'"
+        :title="user ? 'Like' : 'You must be logged in to like pins'"
+        @click="user ? like() : null"
       />
     </button>
   </div>

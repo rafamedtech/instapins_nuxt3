@@ -4,61 +4,75 @@ import Close from 'icons/Close.vue';
 import ArrowLeft from 'icons/ArrowLeft.vue';
 import LeadPencil from 'icons/LeadPencil.vue';
 
-import { useStore } from '@/stores/pins';
-const store = useStore();
+// import { useStore } from '@/stores/pins';
+
+// const store = useStore();
+const route = useRoute();
 const user = useSupabaseUser();
+const client = useSupabaseClient();
 
 // Local state
-const liked = useState(false);
-const myComment = useState('');
-const openModal = useState(false);
-const pin = computed(() => store.getSinglePin(route.params.id));
-
-onMounted(() => {
-  if (pin.likes.length) {
-    liked = pin.likes.some((like) => {
-      return like.username === user.username;
-    });
+const liked = ref(false);
+const myComment = ref('');
+const openModal = ref(false);
+const { data: pin } = await useAsyncData(
+  route.params.id[0],
+  async () => {
+    const { data } = await client.from('pins').select('*').eq('id', `${route.params.id[0]}`);
+    return data;
+  },
+  {
+    transform: (result) => result[0],
   }
-});
+);
 
-const like = async () => {
-  liked.value = !liked.value;
+// console.log(pin);
 
-  if (liked.value) {
-    // await this.$store.dispatch('pins/likePin', this.pin);
-    setTimeout(() => {
-      // this.$store.dispatch('pins/fetchPins');
-    }, 100);
-    return;
-  }
+// onMounted(() => {
+//   if (pin.likes.length) {
+//     liked = pin.likes.some((like) => {
+//       return like.username === user.username;
+//     });
+//   }
+// });
 
-  // await this.$store.dispatch('pins/unlikePin', this.pin);
-  setTimeout(() => {
-    // this.$store.dispatch('pins/fetchPins');
-  }, 100);
-};
+// const like = async () => {
+//   liked.value = !liked.value;
 
-const commentPin = async () => {
-  await this.$store.dispatch('pins/commentPin', {
-    pin: this.$route.params.id,
-    comment: this.myComment,
-  });
-  myComment.value = '';
-  await this.$store.dispatch('pins/fetchPins');
-};
-const deleteComment = async (id) => {
-  await this.$store.dispatch('pins/deleteComment', {
-    pin: this.$route.params.id,
-    comment: id,
-  });
-  await this.$store.dispatch('pins/fetchPins');
-};
+//   if (liked.value) {
+//     // await this.$store.dispatch('pins/likePin', this.pin);
+//     setTimeout(() => {
+//       // this.$store.dispatch('pins/fetchPins');
+//     }, 100);
+//     return;
+//   }
+
+//   // await this.$store.dispatch('pins/unlikePin', this.pin);
+//   setTimeout(() => {
+//     // this.$store.dispatch('pins/fetchPins');
+//   }, 100);
+// };
+
+// const commentPin = async () => {
+//   await this.$store.dispatch('pins/commentPin', {
+//     pin: this.$route.params.id,
+//     comment: this.myComment,
+//   });
+//   myComment.value = '';
+//   await this.$store.dispatch('pins/fetchPins');
+// };
+// const deleteComment = async (id) => {
+//   await this.$store.dispatch('pins/deleteComment', {
+//     pin: this.$route.params.id,
+//     comment: id,
+//   });
+//   await this.$store.dispatch('pins/fetchPins');
+// };
 </script>
 
 <template>
   <main class="container">
-    <button class="mx-4 mb-6 flex gap-x-2 text-gray-500" @click="$router.go(-1)">
+    <button class="mx-4 mb-6 flex gap-x-2 text-gray-500" @click="$router.back()">
       <ArrowLeft fill-color="#5481bb" /> Back
     </button>
     <section
@@ -67,18 +81,18 @@ const deleteComment = async (id) => {
       <figure class="mb-4 h-full overflow-hidden rounded-[16px] shadow-pinterest md:mb-0 md:w-1/2">
         <img class="w-full" :src="pin.url" alt="" />
       </figure>
-      <div v-if="$auth.loggedIn" class="relative z-50 mb-4 md:absolute md:right-4 md:top-4">
-        <div v-if="$auth.user.username !== pin.owner" class="flex flex-col items-center">
+      <div v-if="user" class="relative z-50 mb-4 md:absolute md:right-4 md:top-4">
+        <div v-if="user.username !== pin.owner" class="flex flex-col items-center">
           <HeartOutline
             :size="48"
             :fill-color="liked ? 'red' : 'gray'"
             class="text-white"
-            :class="$auth.loggedIn ? 'cursor-pointer' : 'cursor-not-allowed'"
-            :title="$auth.loggedIn ? 'Like' : 'You must be logged in to like pins'"
-            @click="$auth.loggedIn ? like() : null"
+            :class="user ? 'cursor-pointer' : 'cursor-not-allowed'"
+            :title="user ? 'Like' : 'You must be logged in to like pins'"
+            @click="user ? like() : null"
           />
 
-          <span class="text-sm text-gray-600">{{ pin.likes.length }}</span>
+          <!-- <span v-if="pin.likes" class="text-sm text-gray-600">{{ pin.likes.length }}</span> -->
         </div>
         <button v-else class="rounded-lg p-1 text-white transition-all duration-300">
           <nuxt-link :to="`/${pin.id}/edit/`">
@@ -101,7 +115,7 @@ const deleteComment = async (id) => {
         <div class="w-full">
           <h2 class="ml-4 mb-2 text-center text-2xl font-bold text-primary">Comments</h2>
 
-          <div v-if="pin.comments.length" class="flex flex-col">
+          <!-- <div v-if="pin.comments.length" class="flex flex-col">
             <section
               v-for="comment in pin.comments"
               :key="comment.id"
@@ -119,7 +133,7 @@ const deleteComment = async (id) => {
                 class="group relative w-[80%] rounded-[16px] border border-gray-400 p-4 text-gray-500"
               >
                 <Close
-                  v-if="$auth.loggedIn && $auth.user.username === comment.username.username"
+                  v-if="user && user.username === comment.username.username"
                   class="absolute right-2 top-2 hidden cursor-pointer group-hover:block"
                   @click="deleteComment(comment.id)"
                 />
@@ -129,8 +143,8 @@ const deleteComment = async (id) => {
                 </p>
               </article>
             </section>
-          </div>
-          <div v-else>
+          </div> -->
+          <div>
             <p class="ml-4 mb-2 text-center text-gray-400">No comments yet</p>
           </div>
 
@@ -138,14 +152,14 @@ const deleteComment = async (id) => {
 
           <!-- Comment form -->
           <form
-            v-if="$auth.loggedIn"
+            v-if="user"
             class="flex w-full flex-wrap items-center justify-evenly gap-4 md:justify-start md:gap-2 md:p-4 lg:flex-nowrap"
             @submit.prevent="commentPin"
           >
             <img
               class="h-16 w-16 rounded-full object-cover"
-              :class="!$auth.user.avatar && 'bg-gray-200'"
-              :src="$auth.user.avatar ? $auth.user.avatar : require('@/assets/user-default.png')"
+              :class="!user.avatar && 'bg-gray-200'"
+              :src="user.avatar ? user.avatar : '/assets/user-default.png'"
               alt=""
             />
             <input

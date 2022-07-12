@@ -1,6 +1,10 @@
 <script setup>
 import ImagePlus from 'icons/ImagePlus.vue';
 import Home from 'icons/Home.vue';
+import { useStore } from '@/stores/pins';
+import { storeToRefs } from 'pinia';
+
+const store = useStore();
 
 // Local state
 const openModal = useState(false);
@@ -10,7 +14,7 @@ const user = useSupabaseUser();
 const logoutModal = () => {
   openModal.value = !openModal.value;
 };
-const userLogout = () => {};
+const { userLogout } = storeToRefs(store);
 </script>
 
 <template>
@@ -76,7 +80,7 @@ const userLogout = () => {};
           v-if="openModal"
           confirmation
           message="Are you sure to logout?"
-          @onAction="logout"
+          @onAction="userLogout"
           @closeModal="logoutModal"
         />
       </transition>

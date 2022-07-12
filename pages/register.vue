@@ -3,7 +3,7 @@ import AlertCircle from 'icons/AlertCircle.vue';
 import { useStore } from '@/stores/pins';
 
 const store = useStore();
-const client = useSupabaseClient();
+const router = useRouter();
 
 // Local state
 // const username = ref('');
@@ -15,9 +15,12 @@ const formErrorMsg = ref('');
 // Form submission
 const userRegister = () => {
   if (password.value === confirmPassword.value) {
-    client.auth.signIn({
-      provider: 'google',
+    store.userRegister({
+      // username: username.value,
+      email: email.value,
+      password: password.value,
     });
+    router.push('/');
   }
 
   formErrorMsg.value = 'Passwords do not match';
@@ -25,20 +28,6 @@ const userRegister = () => {
     formErrorMsg.value = '';
   }, 5000);
 };
-// const onSubmit = () => {
-//   if (password.value === confirmPassword.value) {
-//     store.userRegister({
-//       // username: username.value,
-//       email: email.value,
-//       password: password.value,
-//     });
-//   }
-
-//   formErrorMsg.value = 'Passwords do not match';
-//   setTimeout(() => {
-//     formErrorMsg.value = '';
-//   }, 5000);
-// };
 
 definePageMeta({
   title: 'Register | Instapins',

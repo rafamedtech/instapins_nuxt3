@@ -4,12 +4,12 @@ import { useStore } from '@/stores/pins';
 const store = useStore();
 
 // Local state
-const username = ref('');
+const email = ref('');
 const password = ref('');
 
 const userLogin = () => {
   return store.userLogin({
-    username: username.value,
+    email: email.value,
     password: password.value,
   });
 };
@@ -39,11 +39,11 @@ definePageMeta({
       </figure>
       <div class="w-full">
         <section class="mb-2 flex flex-col">
-          <label for="username" class="mb-1 text-sm text-gray-500">Username</label>
+          <label for="email" class="mb-1 text-sm text-gray-500">Email</label>
           <input
-            id="username"
-            v-model="username"
-            type="text"
+            id="email"
+            v-model="email"
+            type="email"
             class="rounded-md border border-gray-500 p-2 text-gray-500 focus:outline-primary"
             required
           />

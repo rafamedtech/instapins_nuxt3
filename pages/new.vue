@@ -3,23 +3,21 @@ import ImageOffOutline from 'icons/ImageOffOutline.vue';
 import TrayArrowUp from 'icons/TrayArrowUp.vue';
 import CloseCircle from 'icons/CloseCircle.vue';
 import ArrowLeft from 'icons/ArrowLeft.vue';
+import { useStore } from '@/stores/pins';
 
-// components: {
-//   ImageOff: ImageOffOutline,
-//   UploadIcon: TrayArrowUp,
-//   Close: CloseCircle,
-//   BackIcon: ArrowLeft,
-// },
+const store = useStore();
+const user = useSupabaseUser();
 
 // Local state
-const pin = useState({
+const pin = reactive({
   title: '',
   description: '',
-  image: '',
+  url: '',
 });
-const isLoading = useState(false);
-const modalMsg = useState('');
-const uploadedImage = useState('');
+
+const isLoading = ref(false);
+const modalMsg = ref('');
+const uploadedImage = ref(null);
 
 //   computed: {
 //     request() {
@@ -27,16 +25,25 @@ const uploadedImage = useState('');
 //     },
 
 const createPin = () => {
-  const formData = new FormData();
-  formData.append('title', pin.title);
-  formData.append('description', pin.description);
-  if (uploadedImage) {
-    formData.append('url', uploadedImage);
-  } else {
-    formData.append('url', pin.image);
-  }
+  console.log({
+    title: pin.title,
+    description: pin.description,
+    url: pin.url,
+    owner: user.value.id,
+  });
 
-  this.$store.dispatch('pins/createPin', formData);
+  // if (uploadedImage) {
+  //   formData.append('url', uploadedImage);
+  // } else {
+  //   formData.append('url', pin.image.value);
+  // }
+
+  store.createPin({
+    title: pin.title,
+    description: pin.description,
+    url: pin.url,
+    owner: user.value.id,
+  });
 };
 
 const onUpload = (e) => {
@@ -52,34 +59,34 @@ const onUpload = (e) => {
   }, 3000);
 
   setTimeout(() => {
-    this.$store.dispatch('pins/uploadImage', {
+    store.uploadImage({
       filename: `${Date.now()}-${file.name}`,
       file,
     });
   }, 2000);
 };
 
-const deleteUploadedImage = () => {
-  const url = uploadedImage.replace(
-    'https://kkacmmdynlmnvnvjismq.supabase.co/storage/v1/object/public/test-bucket/',
-    ''
-  );
+// const deleteUploadedImage = () => {
+//   const url = uploadedImage.replace(
+//     'https://kkacmmdynlmnvnvjismq.supabase.co/storage/v1/object/public/test-bucket/',
+//     ''
+//   );
 
-  modalMsg.value = 'Deleting image...';
-  isLoading.value = true;
+//   modalMsg.value = 'Deleting image...';
+//   isLoading.value = true;
 
-  setTimeout(() => {
-    if (request.status !== 'error') {
-      isLoading.value = false;
-    }
-  }, 3000);
+//   setTimeout(() => {
+//     if (request.status !== 'error') {
+//       isLoading.value = false;
+//     }
+//   }, 3000);
 
-  setTimeout(() => {
-    this.$store.dispatch('pins/deleteUpload', {
-      filename: url,
-    });
-  }, 2500);
-};
+//   setTimeout(() => {
+//     this.$store.dispatch('pins/deleteUpload', {
+//       filename: url,
+//     });
+//   }, 2500);
+// };
 </script>
 
 <template>
@@ -102,11 +109,11 @@ const deleteUploadedImage = () => {
         class="mx-auto w-full items-center justify-center rounded-xl md:my-10 md:w-[400px] md:py-0"
       >
         <figure
-          v-if="uploadedImage || pin.image"
+          v-if="uploadedImage || pin.url"
           class="h-full w-full overflow-hidden rounded-xl py-4"
         >
           <img v-if="uploadedImage" :src="uploadedImage" alt="" class="h-auto w-full rounded-xl" />
-          <img v-else :src="pin.image" alt="" class="h-auto w-full rounded-xl" />
+          <img v-else :src="pin.url" alt="" class="h-auto w-full rounded-xl" />
         </figure>
         <div
           v-else
@@ -149,7 +156,7 @@ const deleteUploadedImage = () => {
           </div>
           <input
             v-else
-            v-model="pin.image"
+            v-model="pin.url"
             type="text"
             placeholder="Add your image url or upload a new one"
             class="w-full rounded-[16px] border border-gray-400 p-4 text-gray-500 focus:outline-none focus:ring-1 focus:ring-gray-500"
